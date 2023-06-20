@@ -5,6 +5,10 @@ from tkinter.filedialog import askdirectory
 from colorama import init, Fore
 import os
 import requests
+import eyed3
+from eyed3.id3.frames import ImageFrame
+
+
 from mutagen.id3 import APIC, ID3
 from mutagen.mp3 import MP3
 
@@ -96,6 +100,9 @@ while True:
         file_choice = input(" ").strip().lower()
         print()
 
+        if file_choice == "q":
+            break
+
         while file_choice != "a" and file_choice != "v":
             print(" Invalid input, try again")
             print()
@@ -136,15 +143,19 @@ while True:
                 try:
                     os.rename(out_file, new_file)
                 except FileExistsError:
-                    print("File already exists")
+                    pass
 
                 response = requests.get(video_object.thumbnail_url)
                 response.raise_for_status()
                 
-                # print(os.path.realpath(new_file))
+                # audiofile = eyed3.load(os.path.realpath(new_file))
+                # if (audiofile.tag == None):
+                #     audiofile.initTag()
+
+                # audiofile.tag.images.set(ImageFrame.FRONT_COVER, response.content, 'rb', 'image/jpeg' )
+                # audiofile.tag.save()
+
                 # mp3_obj = MP3(os.path.realpath(new_file), ID3=ID3)
-
-
 
                 # mp3_obj = ID3()
 
