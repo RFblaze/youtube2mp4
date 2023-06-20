@@ -4,180 +4,236 @@ from tkinter import Tk
 from tkinter.filedialog import askdirectory
 from colorama import init, Fore
 import os
-#We need this pointer relationship to hide the empty window that appears
-root = Tk()
-#To not show the empty window that appears when running the code
-root.withdraw()
-#To make sure the dialog box to select folder appears over every window
-root.attributes('-topmost', True)
+import requests
+from mutagen.id3 import ID3, APIC
 
-#I'm pretty sure the bottom init function is to make colorama work
+# We need this pointer relationship to hide the empty window that appears
+root = Tk()
+# To not show the empty window that appears when running the code
+root.withdraw()
+# To make sure the dialog box to select folder appears over every window
+root.attributes("-topmost", True)
+
+# I'm pretty sure the bottom init function is to make colorama work
 init()
+
+
 def on_complete(stream, filepath):
-    '''This function is just used to display the bottom message when the download
-    is completed. The parameters come from the pytube module'''
-    if file_choice == 'a':
-        audio_filepath = filepath.replace('mp4', 'mp3')
-        print(Fore.GREEN + f' Audio has been successfully downloaded \033[39min {audio_filepath}')
-    if file_choice == 'v':
-        print(Fore.GREEN + f' Video has been successfully downloaded \033[39min {filepath}')
+    """This function is just used to display the bottom message when the download
+    is completed. The parameters come from the pytube module"""
+    if file_choice == "a":
+        audio_filepath = filepath.replace("mp4", "mp3")
+
+        if "/" in audio_filepath:
+            audio_filepath = audio_filepath.replace("\\", "/")
+
+        print(
+            Fore.GREEN
+            + f" Audio has been successfully downloaded \033[39min {audio_filepath}"
+        )
+    if file_choice == "v":
+
+        if "/" in filepath:
+            filepath = filepath.replace("\\", "/")
+
+        print(
+            Fore.GREEN
+            + f" Video has been successfully downloaded \033[39min {filepath}"
+        )
+
 
 def on_progress(stream, chunk, bytes_remaining):
-    '''This function is just used to display the download progress when the download.
-    The parameters come from the pytube module'''
-    print(f' Progress: {round(100 - (bytes_remaining / stream.filesize * 100),2 )}%')
+    """This function is just used to display the download progress when the download.
+    The parameters come from the pytube module"""
+    print(f" Progress: {round(100 - (bytes_remaining / stream.filesize * 100),2 )}%")
     print()
 
 # My link: https://www.youtube.com/watch?v=x64N7PNd28c
 link = None
 while True:
     print()
-    link = input(' Youtube link (type in q to quit):').strip()
+    link = input(" Youtube link (type in q to quit):").strip()
     print()
-    #This is to quit the program
-    if link.strip().lower() == 'q':
+    # This is to quit the program
+    if link.strip().lower() == "q":
         break
-    #Detecting playlist or not
+    # Detecting playlist or not
     if "playlist" not in link:
-    #Parameters of the video_object are to display the messages of the functions on the top
-        try: 
-            video_object = YouTube(link, on_complete_callback= on_complete, on_progress_callback= on_progress)
-        #The exception only happens when the link input is not a link
-        except:
-            #\033[39m is the 'anticode' that shows where to stop the color
-            print(Fore.RED + ' An error occured, make sure you properly copied your YouTube link \033[39m')
-            continue
-
-        print(Fore.LIGHTBLUE_EX + ' Information about the video: \033[39m')
-        print()
-        #This try and except is incase the link input is not a youtube link
+        # Parameters of the video_object are to display the messages of the functions on the top
         try:
-            print(Fore.CYAN + f' Video Title: \033[39m  {video_object.title}')
+            video_object = YouTube(link, on_complete_callback=on_complete, on_progress_callback=on_progress)
+        # The exception only happens when the link input is not a link
         except:
-            print(Fore.RED + ' An error occured, make sure you copied a YouTube link \033[39m')
+            # \033[39m is the 'anticode' that shows where to stop the color
+            print(
+                Fore.RED
+                + " An error occured, make sure you properly copied your YouTube link \033[39m"
+            )
             continue
-        print(Fore.CYAN + f' Channel: \033[39m      {video_object.author}')
-        print(Fore.CYAN + f' Video Length: \033[39m {round(video_object.length / 60,2)} minutes')
-        print(Fore.CYAN + f' Date: \033[39m         {video_object.publish_date}')
+
+        print(Fore.LIGHTBLUE_EX + " Information about the video: \033[39m")
         print()
-        
-        print(' Choose if you would like to save a video or audio only')
-        print(' V - Video and Audio (mp4)')
-        print(' A - Audio only      (mp3)')
-        print()
-        file_choice = input(' ').strip().lower()
+        # This try and except is incase the link input is not a youtube link
+        try:
+            print(Fore.CYAN + f" Video Title: \033[39m  {video_object.title}")
+        except:
+            print(
+                Fore.RED
+                + " An error occured, make sure you copied a YouTube link \033[39m"
+            )
+            continue
+        print(Fore.CYAN + f" Channel: \033[39m      {video_object.author}")
+        print(
+            Fore.CYAN
+            + f" Video Length: \033[39m {round(video_object.length / 60,2)} minutes"
+        )
+        print(Fore.CYAN + f" Date: \033[39m         {video_object.publish_date}")
         print()
 
-        while file_choice != 'a' and file_choice != 'v':
-            print(' Invalid input, try again')
+        print(" Choose if you would like to save a video or audio only")
+        print(" V - Video and Audio (mp4)")
+        print(" A - Audio only      (mp3)")
+        print()
+        file_choice = input(" ").strip().lower()
+        print()
+
+        while file_choice != "a" and file_choice != "v":
+            print(" Invalid input, try again")
             print()
-            print(' Choose if you would like to save a video or audio only')
+            print(" Choose if you would like to save a video or audio only")
             print()
-            print(' V - Video and Audio (mp4)')
-            print(' A - Audio only      (mp3)')
-            file_choice = input(' ').strip().lower()
+            print(" V - Video and Audio (mp4)")
+            print(" A - Audio only      (mp3)")
+            file_choice = input(" ").strip().lower()
             print()
 
-        path_choice = input(' Choose where to save your file (press enter to continue or q to quit)')
-        if path_choice.strip().lower() == 'q':
+        path_choice = input(
+            " Choose where to save your file (press enter to continue or q to quit)"
+        )
+        if path_choice.strip().lower() == "q":
             break
         print()
-        #Asks user where to save the video or audio they want
-        SAVE_PATH = askdirectory(title='Select Folder') # shows dialog box and return the path
-        while file_choice != 'a' or file_choice != 'v':
-            if file_choice == 'v':
+        # Asks user where to save the video or audio they want
+        SAVE_PATH = askdirectory(
+            title="Select Folder"
+        )  # shows dialog box and return the path
+
+        while file_choice != "a" or file_choice != "v":
+            if file_choice == "v":
                 # Some links don't work with get_highest resolution, so we have to handle that
                 try:
                     video_object.streams.get_highest_resolution().download(SAVE_PATH)
-                
+
                 except:
                     video_object.streams.get_lowest_resolution().download(SAVE_PATH)
 
                 break
-            elif file_choice == 'a':
-                #The code structure below came from https://www.codespeedy.com/download-youtube-video-as-mp3-using-python/
-                #It makes it so that the output is an mp3 instead of an mp4
+            elif file_choice == "a":
+                # The code structure below came from https://www.codespeedy.com/download-youtube-video-as-mp3-using-python/
+                # It makes it so that the output is an mp3 instead of an mp4
                 out_file = video_object.streams.get_audio_only().download(SAVE_PATH)
                 base, ext = os.path.splitext(out_file)
-                new_file = base + '.mp3'
+                new_file = base + ".mp3"
                 os.rename(out_file, new_file)
+
+                if "/" in out_file:
+                    out_file.replace("\\", "/")
+
                 break
     if "playlist" in link:
-        try: 
+        try:
             playlist_object = Playlist(link)
         except:
-            #The exception only happens when the link input is not a link
+            # The exception only happens when the link input is not a link
             # print(Fore.RED + ' An error occured, make sure you properly copied your YouTube link. \033[39m')
             continue
-        print(Fore.LIGHTBLUE_EX + ' Information about the playlist: \033[39m')
+        print(Fore.LIGHTBLUE_EX + " Information about the playlist: \033[39m")
         print()
-        #This try and except is incase the link input is not a youtube link
+        # This try and except is incase the link input is not a youtube link
         try:
-            print(Fore.CYAN + f' Playlist Title: \033[39m   {playlist_object.title}')
+            print(Fore.CYAN + f" Playlist Title: \033[39m   {playlist_object.title}")
         except:
-            print(Fore.RED + ' An error occured, make sure you copied a YouTube link OR that your playlist is not private \033[39m')
+            print(
+                Fore.RED
+                + " An error occured, make sure you copied a YouTube link OR that your playlist is not private \033[39m"
+            )
             continue
-        print(Fore.CYAN + f' Channel: \033[39m          {playlist_object.owner}')
-        print(Fore.CYAN + f' Number of Videos: \033[39m {playlist_object.length}')
+        print(Fore.CYAN + f" Channel: \033[39m          {playlist_object.owner}")
+        print(Fore.CYAN + f" Number of Videos: \033[39m {playlist_object.length}")
         print()
 
-        print(' Choose if you would like to save every video in your playlist as video or audio files')
-        print(' V - Video and Audio (mp4)')
-        print(' A - Audio only      (mp3)')
+        print(
+            " Choose if you would like to save every video in your playlist as video or audio files"
+        )
+        print(" V - Video and Audio (mp4)")
+        print(" A - Audio only      (mp3)")
         print()
-        file_choice = input(' ').strip().lower()
+        file_choice = input(" ").strip().lower()
         print()
 
-        while file_choice != 'a' and file_choice != 'v':
-            print(' Invalid input, try again')
+        while file_choice != "a" and file_choice != "v":
+            print(" Invalid input, try again")
             print()
-            print(' Choose if you would like to save a video or audio only')
+            print(" Choose if you would like to save a video or audio only")
             print()
-            print(' V - Video and Audio (mp4)')
-            print(' A - Audio only      (mp3)')
-            file_choice = input(' ').strip().lower()
+            print(" V - Video and Audio (mp4)")
+            print(" A - Audio only      (mp3)")
+            file_choice = input(" ").strip().lower()
             print()
 
-        path_choice = input(' Choose where to save your files (press enter to continue or q to quit)')
-        if path_choice.strip().lower() == 'q':
+        path_choice = input(
+            " Choose where to save your files (press enter to continue or q to quit)"
+        )
+        if path_choice.strip().lower() == "q":
             break
         print()
-        #Asks user where to save the video or audio they want
-        SAVE_PATH = askdirectory(title='Select Folder') # shows dialog box and return the path
-        while file_choice != 'a' or file_choice != 'v':
-            if file_choice == 'v':
+        # Asks user where to save the video or audio they want
+        SAVE_PATH = askdirectory(
+            title="Select Folder"
+        )  # shows dialog box and return the path
+        while file_choice != "a" or file_choice != "v":
+            if file_choice == "v":
                 # Some links don't work with get_highest resolution, so we have to handle that
                 try:
                     for video in playlist_object.videos:
                         video.streams.get_highest_resolution().download(SAVE_PATH)
-                        print(Fore.CYAN  + f'{video.title}\033[39m has been successfully downloaded')
+                        print(
+                            Fore.CYAN
+                            + f"{video.title}\033[39m has been successfully downloaded"
+                        )
                         print()
                 except:
                     for video in playlist_object.videos:
                         video.streams.get_lowest_resolution().download(SAVE_PATH)
-                        print(Fore.CYAN + f'{video.title}\033[39m has been successfully downloaded')
+                        print(
+                            Fore.CYAN
+                            + f"{video.title}\033[39m has been successfully downloaded"
+                        )
                         print()
                 break
-            elif file_choice == 'a':
-                #The code structure below came from https://www.codespeedy.com/download-youtube-video-as-mp3-using-python/
-                #It makes it so that the output is an mp3 instead of an mp4
+            elif file_choice == "a":
+                # The code structure below came from https://www.codespeedy.com/download-youtube-video-as-mp3-using-python/
+                # It makes it so that the output is an mp3 instead of an mp4
                 for audio in playlist_object.videos:
                     out_file = audio.streams.get_audio_only().download(SAVE_PATH)
                     base, ext = os.path.splitext(out_file)
-                    new_file = base + '.mp3'
+                    new_file = base + ".mp3"
                     os.rename(out_file, new_file)
-                    print(Fore.CYAN  + f'{audio.title}\033[39m has been successfully downloaded')
+                    print(
+                        Fore.CYAN
+                        + f"{audio.title}\033[39m has been successfully downloaded"
+                    )
                     print()
                 break
-#This is how to save subtitles
-#>>> yt = YouTube('http://youtube.com/watch?v=2lAe1cqCOXo')
-#>>> caption = yt.captions.get_by_language_code('en')
-#>>> print(caption.generate_srt_captions())
-#1
-#00:00:10,200 --> 00:00:11,140
-#K-pop!
+# This is how to save subtitles
+# >>> yt = YouTube('http://youtube.com/watch?v=2lAe1cqCOXo')
+# >>> caption = yt.captions.get_by_language_code('en')
+# >>> print(caption.generate_srt_captions())
+# 1
+# 00:00:10,200 --> 00:00:11,140
+# K-pop!
 #
-#2
-#00:00:13,400 --> 00:00:16,200
-#That is so awkward to watch.
-#...
+# 2
+# 00:00:13,400 --> 00:00:16,200
+# That is so awkward to watch.
+# ...
