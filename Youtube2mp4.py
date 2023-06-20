@@ -5,7 +5,8 @@ from tkinter.filedialog import askdirectory
 from colorama import init, Fore
 import os
 import requests
-from mutagen.id3 import ID3, APIC
+from mutagen.id3 import APIC, ID3
+from mutagen.mp3 import MP3
 
 # We need this pointer relationship to hide the empty window that appears
 root = Tk()
@@ -24,21 +25,19 @@ def on_complete(stream, filepath):
     if file_choice == "a":
         audio_filepath = filepath.replace("mp4", "mp3")
 
-        if "/" in audio_filepath:
-            audio_filepath = audio_filepath.replace("\\", "/")
-
         print(
             Fore.GREEN
-            + f" Audio has been successfully downloaded \033[39min {audio_filepath}"
+            + f" Audio has been successfully downloaded \033[39min {os.path.realpath(audio_filepath)}"
         )
     if file_choice == "v":
-
+        
+        # Just for appearance
         if "/" in filepath:
             filepath = filepath.replace("\\", "/")
 
         print(
             Fore.GREEN
-            + f" Video has been successfully downloaded \033[39min {filepath}"
+            + f" Video has been successfully downloaded \033[39min {os.path.realpath(filepath)}"
         )
 
 
@@ -134,10 +133,30 @@ while True:
                 out_file = video_object.streams.get_audio_only().download(SAVE_PATH)
                 base, ext = os.path.splitext(out_file)
                 new_file = base + ".mp3"
-                os.rename(out_file, new_file)
+                try:
+                    os.rename(out_file, new_file)
+                except FileExistsError:
+                    print("File already exists")
 
-                if "/" in out_file:
-                    out_file.replace("\\", "/")
+                response = requests.get(video_object.thumbnail_url)
+                response.raise_for_status()
+                
+                # print(os.path.realpath(new_file))
+                # mp3_obj = MP3(os.path.realpath(new_file), ID3=ID3)
+
+
+
+                # mp3_obj = ID3()
+
+                # mp3_obj.add(APIC(
+                #     encoding=3,  # UTF-8
+                #     mime='image/jpeg',
+                #     type=3,  # Front cover
+                #     desc='Cover',
+                #     data= response.content
+                # ))
+
+                # mp3_obj.save(new_file)
 
                 break
     if "playlist" in link:
