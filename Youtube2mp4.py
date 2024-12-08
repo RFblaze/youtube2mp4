@@ -1,5 +1,5 @@
-from pytube import YouTube
-from pytube import Playlist
+from pytubefix import YouTube
+from pytubefix import Playlist
 from tkinter import Tk
 from tkinter.filedialog import askdirectory
 from colorama import init, Fore
@@ -7,10 +7,6 @@ import os
 import requests
 import eyed3
 from eyed3.id3.frames import ImageFrame
-
-
-from mutagen.id3 import APIC, ID3
-from mutagen.mp3 import MP3
 
 # We need this pointer relationship to hide the empty window that appears
 root = Tk()
